@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>jQuery 연습</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+<body>
+        <div class="container" style="padding-top: 100px">
+                <div>
+                    <h3>여기는 댓글영역</h3>
+                    <ul id="commentArea"></ul> <!-- 댓글을 쌓는 영역.-->
+                </div>
+         
+                <hr />
+         
+                <div>
+                    <form id="commentForm">
+                        <input type="text" name="comment" class="form-control" style="width: 200px; float: left; margin-right:30px;">
+                        <button class="btn btn-primary">댓글작성하기</button> <!--버튼 클릭 리스너-->
+                    </form>
+                </div>
+            </div>
+        
+
+
+<script
+src="http://code.jquery.com/jquery-2.2.4.min.js"
+integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+crossorigin="anonymous"></script>
+<script>
+$( document ).ready( function(){
+    $('#commentForm').submit(function(){
+        var commentVal = $('#commentForm input[name=comment]').val();
+       
+        $('#commentArea').append('<li>'+commentVal +'</li>');
+        // $('##commentForm input[name=comment]').val(''); // 지워주는 method.
+        return false;
+
+    });
+    
+});
+</script>
+
+</body>
+</html>
+
+
+<!-- 
+★ val() : Form Element 의 값을 받아오는데 쓰인다. (주로 input 이나 textarea 정도?)
+
+- 주의해야할 점은 Form Element 이외의 값은 받아오질 못한다는 점.
+
+★ val(value) : value의 경우 string 또는 string의 배열(이 경우 value들의 matching을 잘 시켜야 오류를 피할 수 있다) 
+
+또는 함수(function(index, value) 이런 형태)로 넣을 수 있다.
+
+이 함수 역시 Form Element의 Value 값을 Set할 때 주로 쓰인다
+
+
+
+출처: http://secretroute.tistory.com/entry/jQuery-val-text-html의-차이 [Empty]
+-->

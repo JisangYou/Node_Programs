@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    자료형
+    <script>
+    // var a = 111; //숫자형
+    // var b = "하하하"; //문자형변수
+    // var c = true; //boolean
+    // // var d;  
+    // // console.log(d); //undefined error
+    // // console.log(e);  // reference error
+
+    // // 1. 첫번째 선언법
+    // var arr1 = new Array();
+    // arr1[0] = "1번째"
+    // arr1[1] = "2번째"
+    // arr1[2] = "3번째"
+ 
+    // // 2번째 방법
+    // var arr2 = new Array("1번째", "2번째", "3번째");
+    
+    // // 3번째 방법
+    // var arr3 = ["1번째", "2번째", "3번째"];
+
+    var arr = ["1번째", "2번째", "3번째"];
+
+    
+    for(var i =0; i<arr.length; i++){
+        console.log( i+ "번째 = " + arr[i]);
+    }
+
+    for(var key in arr){
+        console.log(arr[key]);
+    }
+
+    arr.forEach(function(value){
+        console.log(value);
+    });        
+
+
+    // 리터럴 표현법
+    // 객체 선언과 동시에 객체 생성
+  
+    var a = {
+    numberVal : 111,
+    arrayVal : "zzz",
+    arrayList : [1,2,3],
+    Speak : function(){
+        console.log("function");
+     }
+    }
+    a.addMember = "멤버를 추가합니다.";
+    // console.log(a.addMember);
+
+    for(var property in a){
+        console.log( property + "/ "+ a[property]);
+    }
+
+    // 함수표현법
+
+    function test(name, title){
+    this.name = name;
+    this.title = title;
+    var private = "내부에서만 사용"; //내부 변수 이므로,
+    }
+    var myTest = new test( "park" , "jjjj")
+    console.log(myTest.name);
+    console.log(myTest.private); // 출력시에 undefined     
+
+    // prototype
+
+    function Car(){
+    this.name = "My Car";
+    }
+
+    Car.prototype.color = "red";
+    Car.prototype.move = function(){
+    console.log(this.name + " is "+this.color);
+    }   //prototype으로 멤버추가
+
+    var myCar = new Car();
+    myCar.move();
+
+      //    New키워드를 이용한 구현
+    //      상속
+    
+    function Car(){
+    this.name = "super name";
+    this.showName = function(){
+        console.log(this.name + " is print");
+    }
+    }
+    function Taxi(){
+    var _super = new Car();
+    _super.name = "taxi name";
+    return _super;
+    }
+    var myTaxi = new Taxi();
+    myTaxi.showName();
+
+    // 문제가 있음..
+    console.log(myTaxi instanceof Car);
+        //True
+    console.log(myTaxi instanceof Taxi);
+    //False
+
+    </script>
+    
+</body>
+</html>
