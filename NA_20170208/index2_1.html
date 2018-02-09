@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+
+        function Car() {
+            this.name = "hyundai";
+            this.color = "red";
+        }
+        Car.prototype.move = function () {
+            console.log("Car is " + this.color);
+        };
+
+        var subCar = Object.create(Car.prototype);
+        Car.call(subCar);
+        subCar.move();
+
+
+        console.log("========call=======================")
+
+        function Person(name, title) {
+            this.name = name;
+            this.title = title;
+        }
+        var man = {};
+        Person.call(man, "me", "subject"); //인자를 나열할시
+        console.log(man.name);
+
+        console.log("========apply=======================")
+
+        function Person(name, title) {
+            this.name = name;
+            this.title = title;
+        }
+        var man = {};
+        Person.apply(man, ["m2e", "hello"]); //인자를 배열로
+        console.log(man.name);
+
+        console.log("========get,set=======================")
+
+        function Person() {
+            this.name = "hello";
+        }
+        Person.prototype.speack = function () {
+            console.log(this.name + " speack");
+        };
+        var myMan = Object.create(Person.prototype);
+        Object.defineProperties(myMan, {
+            name: {
+                value: "myMan",
+                writable: true
+            },
+            hold: {
+                get: function () {
+                    console.log(this.name + " hold");
+                },
+                set: function (value) {
+                    this.name = value;
+                    console.log('set hold function');
+                }
+            }
+        });
+        myMan.hold = "hello";
+        myMan.hold;
+
+        console.log("========prototype change=======================")
+
+        function RedCar() {
+            this.color = "red";
+        }
+        RedCar.prototype.move = function () {
+            console.log(this.color + " is move(red)");
+        }
+        function BlueCar() {
+            this.color = "blue";
+        }
+        BlueCar.prototype.move = function () {
+            console.log(this.color + " is move(blue)");
+        }
+        var mycar = new RedCar(); //생성은 RedCar로 진행
+        mycar.__proto__ = BlueCar.prototype;
+        //만약 BlueCar의 property로 작성하고 싶다면 아래 주석 해제
+        //BlueCar.call(mycar); 
+        mycar.move();
+        //console.log(RedCar.prototype.isPrototypeOf(mycar));
+
+        console.log("=======상속==================================")
+
+        function Car() {
+            this.name = "Car";
+        }
+        Car.prototype.move = function () {
+            console.log(this.name + " move");
+        }
+        //택시 상속
+        function Taxi() {
+            Car.call(this);
+        }
+        Taxi.prototype = Car.prototype;
+
+        var mycar = Object.create(Taxi.prototype);
+        Taxi.call(mycar);
+        mycar.move();
+
+        console.log(Car.prototype.isPrototypeOf(mycar));
+    </script>
+</body>
+
+</html>

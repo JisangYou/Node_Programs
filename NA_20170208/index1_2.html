@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    프로토타입
+    <script>
+        // // 프로토타입 - 공유하는 객체라고 이해하기.
+        // function Car(){ }
+        // var myCar1 = new Car();
+        // var myCar2 = new Car();
+        // Car.prototype.color ="red";
+        // console.log(myCar1.color);
+        // console.log(myCar2.color);
+        // Car.prototype.color ="blue";
+        // console.log(myCar1.color);
+        // console.log(myCar2.color);   
+
+
+        // console.log("=======프로퍼티===========");  
+
+        //     // 프로퍼티
+        // function Car(){
+        //     this.name = "첫번째";
+        //     this.title = "타이틀"
+        // }
+        //     Car.prototype.pro1 = "val1";
+        //     Car.prototype.pro2 = "val2";
+        //     var myCar = new Car();
+        //     var myCar = new Car();
+        //     var prop;
+        //     for(prop in myCar){
+        //     if(myCar.hasOwnProperty(prop)){
+        //         console.log(prop + " = "+ myCar[prop]);
+        //     }
+        // }
+
+        var a = {};
+        Object.prototype.tt = "hello";
+        console.log(a.tt);
+
+    </script>
+</body>
+
+</html>

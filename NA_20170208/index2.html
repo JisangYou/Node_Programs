@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8">
+    <title>CSS수업</title>
+</head>
+
+<body>
+
+    <div id="clickDiv">
+        글자색 변환
+    </div>
+
+    <div id="secondDiv">
+        셀렉터 전부 작동 되는지
+    </div>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+        crossorigin="anonymous"></script>
+    <script src="./jquery-changeColor.js"></script>
+    <script type="text/javascript">
+        (function ($) {
+
+            $(document).ready(function () {
+                $('#clickDiv , #secondDiv').changeColor();
+            });
+        })(jQuery);
+    </script>
+</body>
+
+</html>
