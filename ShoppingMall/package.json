@@ -1,0 +1,24 @@
+{
+  "name": "jay",
+  "version": "1.0.0",
+  "description": "쇼핑몰 프로젝트",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon ./app.js"
+  },
+  "keywords": [
+    "쇼핑몰"
+  ],
+  "author": "유지상",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "ejs": "^2.5.7",
+    "express": "^4.16.2",
+    "mongodb": "^3.0.2",
+    "mongoose": "^4.11.2",
+    "mongoose-auto-increment": "^5.0.1",
+    "morgan": "^1.9.0",
+    "path": "^0.12.7"
+  }
+}
