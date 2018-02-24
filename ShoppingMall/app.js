@@ -2,6 +2,7 @@ var express = require('express');
 var path = require('path');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
 
 // 패키지 가져오는 부분
 var mongoose = require('mongoose');
@@ -29,12 +30,17 @@ app.set('views', path.join(__dirname, 'views')); // views 경로를 잡아주는
 console.log(__dirname); // 디렉토리 경로 체크
 app.set('view engine', 'ejs');
 
-// 미들웨어 세팅
+// 미들웨어 세팅 // 미들웨어를 먼저 세팅해야 라우팅 시 , 사용가능(순서)
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
 
-
+//업로드 path 추가
+app.use('/uploads', express.static('uploads'));
 
 app.get('/', function(req,res){
     res.send('first app 시작합니다.');  
