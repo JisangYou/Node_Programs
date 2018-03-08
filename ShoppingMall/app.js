@@ -3,6 +3,11 @@ var path = require('path');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
+//flash  메시지 관련
+var flash = require('connect-flash');
+ //passport 로그인 관련
+var passport = require('passport');
+var session = require('express-session');
 
 // 패키지 가져오는 부분
 var mongoose = require('mongoose');
@@ -21,6 +26,7 @@ var connect = mongoose.connect('mongodb://127.0.0.1:27017/fastcampus', { useMong
 autoIncrement.initialize(connect);
 
 var admin = require('./routes/admin');
+var accounts = require('./routes/accounts');
 
 var app = express();
 var port = 3000;
@@ -34,19 +40,38 @@ app.set('view engine', 'ejs');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
 
 //업로드 path 추가
 app.use('/uploads', express.static('uploads'));
+//session 관련 셋팅
+app.use(session({
+    secret: 'fastcampus',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      maxAge: 2000 * 60 * 60 //지속시간 2시간
+    }
+}));
+
+//passport 적용
+app.use(passport.initialize());
+app.use(passport.session());
+
+//플래시 메시지 관련
+app.use(flash());
+
+app.get('/', function(req,res){
+    res.send('first app');
+});
 
 app.get('/', function(req,res){
     res.send('first app 시작합니다.');  
 });
 
 app.use('/admin',admin);
+app.use('/accounts', accounts);
 
 app.listen(port, function(){
     console.log('Express listening on port', port);

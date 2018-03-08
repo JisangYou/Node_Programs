@@ -83,7 +83,7 @@ router.post('/products/edit/:id', upload.single('thumbnail'), csrfProtection, fu
     //그전에 지정되 있는 파일명을 받아온다
     ProductsModel.findOne( {id : req.params.id} , function(err, product){
         
-        if(req.file){  //요청중에 파일이 존재 할시 이전이미지 지운다.
+        if(req.file && product.thumbnail){  //요청중에 파일이 존재 할시 이전이미지 지운다.
             fs.unlinkSync( uploadDir + '/' + product.thumbnail );
         }
 
@@ -101,6 +101,8 @@ router.post('/products/edit/:id', upload.single('thumbnail'), csrfProtection, fu
         });
     });
 });
+
+
 
 
 router.get('/products/delete/:id', function (req, res) {
