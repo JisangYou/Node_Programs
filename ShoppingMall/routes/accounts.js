@@ -14,7 +14,7 @@ passport.deserializeUser(function (user, done) {
     var result = user;
     result.password="";
     console.log('deserializeUser');
-    done(null, user);
+    done(null, result);
 });
 
 passport.use(new LocalStrategy({
@@ -64,7 +64,7 @@ router.post('/login' ,
         failureFlash: true 
     }), 
     function(req, res){
-        res.send('<script>alert("로그인 성공");location.href="/accounts/success";</script>');
+        res.send('<script>alert("로그인 성공");location.href="/accounts/login";</script>');
     }
 );
 

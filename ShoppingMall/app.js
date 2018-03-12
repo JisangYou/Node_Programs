@@ -9,6 +9,8 @@ var flash = require('connect-flash');
 var passport = require('passport');
 var session = require('express-session');
 
+
+
 // 패키지 가져오는 부분
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
@@ -27,6 +29,10 @@ autoIncrement.initialize(connect);
 
 var admin = require('./routes/admin');
 var accounts = require('./routes/accounts');
+var auth = require('./routes/auth')
+var home = require('./routes/home');
+var chat = require('./routes/chat');
+//.. 중략
 
 var app = express();
 var port = 3000;
@@ -62,17 +68,29 @@ app.use(passport.session());
 //플래시 메시지 관련
 app.use(flash());
 
-app.get('/', function(req,res){
-    res.send('first app');
-});
-
-app.get('/', function(req,res){
-    res.send('first app 시작합니다.');  
-});
+app.use(function(req, res, next) {
+    app.locals.isLogin = req.isAuthenticated();
+   
+    //app.locals.urlparameter = req.url; //현재 url 정보를 보내고 싶으면 이와같이 셋팅
+    //app.locals.userData = req.user; //사용 정보를 보내고 싶으면 이와같이 셋팅
+    next();
+  });
 
 app.use('/admin',admin);
 app.use('/accounts', accounts);
+app.use('/auth', auth);
+app.use('/chat', chat);
+app.use('/', home);
 
-app.listen(port, function(){
+var server = app.listen( port, function(){
     console.log('Express listening on port', port);
-})
+});
+
+var listen = require('socket.io');
+var io = listen(server);
+io.on('connection', function(socket){ 
+    socket.on('client message', function(data){
+        io.emit('server message', data.message);
+       
+    });
+});// 소켓을 서버에 붙인다고 표현

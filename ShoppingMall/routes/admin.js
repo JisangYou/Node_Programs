@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var ProductsModel = require('../models/ProductsModel');
 var CommentsModel = require('../models/CommentsModel');
+var loginRequired = require('../libs/loginRequired');
 
 // csrf 셋팅
 var csrf = require('csurf');
@@ -37,19 +38,20 @@ router.get('/products', function (req, res) {
     });
 });
 
-router.get('/products/write', csrfProtection, function (req, res) {
+router.get('/products/write', loginRequired, csrfProtection, function (req, res) {
     //edit에서도 같은 form을 사용하므로 빈 변수( product )를 넣어서 에러를 피해준다
     res.render('admin/form', { product: "", csrfToken: req.csrfToken() });
 });
 
-router.post('/products/write', upload.single('thumbnail'), csrfProtection, function(req,res){
+router.post('/products/write', loginRequired, upload.single('thumbnail'), csrfProtection, function (req, res) {
 
     console.log(req.file); // 파일이 잘 들어오는 지 체크
     var product = new ProductsModel({
-        name : req.body.name,
-        thumbnail : (req.file) ? req.file.filename : "", // 파일요청이 있으면, 파일이름을 없으면 그냥 빈 값으로.
-        price : req.body.price,
-        description : req.body.description,
+        name: req.body.name,
+        thumbnail: (req.file) ? req.file.filename : "", // 파일요청이 있으면, 파일이름을 없으면 그냥 빈 값으로.
+        price: req.body.price,
+        description: req.body.description,
+        username : req.user.username
     });
 
     var validationError = product.validateSync();
@@ -62,42 +64,42 @@ router.post('/products/write', upload.single('thumbnail'), csrfProtection, funct
     }
 });
 
-router.get('/products/detail/:id' , function(req, res){
+router.get('/products/detail/:id', function (req, res) {
     //url 에서 변수 값을 받아올떈 req.params.id 로 받아온다
-    ProductsModel.findOne( { 'id' :  req.params.id } , function(err ,product){
+    ProductsModel.findOne({ 'id': req.params.id }, function (err, product) {
         //제품정보를 받고 그안에서 댓글을 받아온다.
-        CommentsModel.find({ product_id : req.params.id } , function(err, comments){
-            res.render('admin/productsDetail', { product: product , comments : comments });
-        });        
+        CommentsModel.find({ product_id: req.params.id }, function (err, comments) {
+            res.render('admin/productsDetail', { product: product, comments: comments });
+        });
     });
 });
 
-router.get('/products/edit/:id', csrfProtection, function (req, res) {
+router.get('/products/edit/:id', loginRequired, csrfProtection, function (req, res) {
     //기존에 폼에 value안에 값을 셋팅하기 위해 만든다.
     ProductsModel.findOne({ id: req.params.id }, function (err, product) {
         res.render('admin/form', { product: product, csrfToken: req.csrfToken() });
     });
 });
 
-router.post('/products/edit/:id', upload.single('thumbnail'), csrfProtection, function(req, res){
+router.post('/products/edit/:id', loginRequired, upload.single('thumbnail'), csrfProtection, function (req, res) {
     //그전에 지정되 있는 파일명을 받아온다
-    ProductsModel.findOne( {id : req.params.id} , function(err, product){
-        
-        if(req.file && product.thumbnail){  //요청중에 파일이 존재 할시 이전이미지 지운다.
-            fs.unlinkSync( uploadDir + '/' + product.thumbnail );
+    ProductsModel.findOne({ id: req.params.id }, function (err, product) {
+
+        if (req.file && product.thumbnail) {  //요청중에 파일이 존재 할시 이전이미지 지운다.
+            fs.unlinkSync(uploadDir + '/' + product.thumbnail);
         }
 
         //넣을 변수 값을 셋팅한다
         var query = {
-            name : req.body.name,
-            thumbnail : (req.file) ? req.file.filename : product.thumbnail,
-            price : req.body.price,
-            description : req.body.description,
+            name: req.body.name,
+            thumbnail: (req.file) ? req.file.filename : product.thumbnail,
+            price: req.body.price,
+            description: req.body.description,
         };
 
         //update의 첫번째 인자는 조건, 두번째 인자는 바뀔 값들
-        ProductsModel.update({ id : req.params.id }, { $set : query }, function(err){
-            res.redirect('/admin/products/detail/' + req.params.id ); //수정후 본래보던 상세페이지로 이동
+        ProductsModel.update({ id: req.params.id }, { $set: query }, function (err) {
+            res.redirect('/admin/products/detail/' + req.params.id); //수정후 본래보던 상세페이지로 이동
         });
     });
 });
