@@ -3,6 +3,8 @@ var router = express.Router();
 var ProductsModel = require('../models/ProductsModel');
 var CommentsModel = require('../models/CommentsModel');
 var loginRequired = require('../libs/loginRequired');
+var co = require('co');
+var paginate = require('express-paginate');
 
 // csrf 셋팅
 var csrf = require('csurf');
@@ -30,12 +32,22 @@ router.get('/', function (req, res) {
     res.send('admin app');
 });
 
-router.get('/products', function (req, res) {
-    ProductsModel.find(function (err, products) {
-        res.render('admin/products',
-            { products: products } // DB에서 받은 products를 products변수명으로 내보냄
-        );
+router.get('/products', paginate.middleware(3, 50), async (req,res) => {
+
+    const [ results, itemCount ] = await Promise.all([
+        ProductsModel.find().limit(req.query.limit).skip(req.skip).exec(),
+        ProductsModel.count({})
+    ]);
+    const pageCount = Math.ceil(itemCount / req.query.limit);
+    
+    const pages = paginate.getArrayPages(req)( 4 , pageCount, req.query.page);
+
+    res.render('admin/products', { 
+        products : results , 
+        pages: pages,
+        pageCount : pageCount,
     });
+
 });
 
 router.get('/products/write', loginRequired, csrfProtection, function (req, res) {
@@ -51,7 +63,7 @@ router.post('/products/write', loginRequired, upload.single('thumbnail'), csrfPr
         thumbnail: (req.file) ? req.file.filename : "", // 파일요청이 있으면, 파일이름을 없으면 그냥 빈 값으로.
         price: req.body.price,
         description: req.body.description,
-        username : req.user.username
+        username: req.user.username
     });
 
     var validationError = product.validateSync();
@@ -64,15 +76,20 @@ router.post('/products/write', loginRequired, upload.single('thumbnail'), csrfPr
     }
 });
 
+
 router.get('/products/detail/:id', function (req, res) {
-    //url 에서 변수 값을 받아올떈 req.params.id 로 받아온다
-    ProductsModel.findOne({ 'id': req.params.id }, function (err, product) {
-        //제품정보를 받고 그안에서 댓글을 받아온다.
-        CommentsModel.find({ product_id: req.params.id }, function (err, comments) {
-            res.render('admin/productsDetail', { product: product, comments: comments });
+    var getData = async () => {
+        return {
+            product: await ProductsModel.findOne({ 'id': req.params.id }).exec(),
+            comments: await CommentsModel.find({ 'product_id': req.params.id }).exec()
+        };
+    };
+
+        getData().then(function (result) {
+            res.render('admin/productsDetail', { product: result.product, comments: result.comments });
         });
     });
-});
+
 
 router.get('/products/edit/:id', loginRequired, csrfProtection, function (req, res) {
     //기존에 폼에 value안에 값을 셋팅하기 위해 만든다.
@@ -134,6 +151,8 @@ router.post('/products/ajax_comment/delete', function (req, res) {
     });
 });
 
-
+router.post('/products/ajax_summernote', loginRequired, upload.single('thumbnail'), function(req,res){
+    res.send( '/uploads/' + req.file.filename);
+});
 
 module.exports = router

@@ -5,7 +5,7 @@ var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 //flash  메시지 관련
 var flash = require('connect-flash');
- //passport 로그인 관련
+//passport 로그인 관련
 var passport = require('passport');
 var session = require('express-session');
 
@@ -19,7 +19,7 @@ var autoIncrement = require('mongoose-auto-increment');
 // 환경설정(성공시, 실패시)
 var db = mongoose.connection;
 db.on('error', console.error);
-db.once('open', function(){
+db.once('open', function () {
     console.log('mongodb connect');
 });
 
@@ -32,6 +32,9 @@ var accounts = require('./routes/accounts');
 var auth = require('./routes/auth')
 var home = require('./routes/home');
 var chat = require('./routes/chat');
+var products = require('./routes/products');
+var cart = require('./routes/cart');
+var checkout = require('./routes/checkout');
 //.. 중략
 
 var app = express();
@@ -51,15 +54,25 @@ app.use(cookieParser());
 
 //업로드 path 추가
 app.use('/uploads', express.static('uploads'));
+//static path 추가
+app.use('/static', express.static('static'));
 //session 관련 셋팅
-app.use(session({
+var connectMongo = require('connect-mongo');
+var MongoStore = connectMongo(session);
+
+var sessionMiddleWare = session({
     secret: 'fastcampus',
     resave: false,
     saveUninitialized: true,
     cookie: {
-      maxAge: 2000 * 60 * 60 //지속시간 2시간
-    }
-}));
+        maxAge: 2000 * 60 * 60 //지속시간 2시간
+    },
+    store: new MongoStore({
+        mongooseConnection: mongoose.connection,
+        ttl: 14 * 24 * 60 * 60
+    })
+});
+app.use(sessionMiddleWare);
 
 //passport 적용
 app.use(passport.initialize());
@@ -68,29 +81,31 @@ app.use(passport.session());
 //플래시 메시지 관련
 app.use(flash());
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     app.locals.isLogin = req.isAuthenticated();
-   
+
     //app.locals.urlparameter = req.url; //현재 url 정보를 보내고 싶으면 이와같이 셋팅
     //app.locals.userData = req.user; //사용 정보를 보내고 싶으면 이와같이 셋팅
     next();
-  });
+});
 
-app.use('/admin',admin);
+app.use('/admin', admin);
 app.use('/accounts', accounts);
 app.use('/auth', auth);
 app.use('/chat', chat);
+app.use('/products', products);
+app.use('/cart', cart);
+app.use('/checkout', checkout);
 app.use('/', home);
 
-var server = app.listen( port, function(){
+var server = app.listen(port, function () {
     console.log('Express listening on port', port);
 });
 
 var listen = require('socket.io');
 var io = listen(server);
-io.on('connection', function(socket){ 
-    socket.on('client message', function(data){
-        io.emit('server message', data.message);
-       
-    });
-});// 소켓을 서버에 붙인다고 표현
+//socket io passport 접근하기 위한 미들웨어 적용
+io.use(function (socket, next) {
+    sessionMiddleWare(socket.request, socket.request.res, next);
+});
+require('./libs/socketConnection')(io);// 소켓을 서버에 붙인다고 표현

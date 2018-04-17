@@ -6,15 +6,13 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Node.js 쇼핑몰</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script
-        src="https://code.jquery.com/jquery-2.2.4.min.js"
-        integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
-        crossorigin="anonymous"></script>
-        <!--폰트어섬추가 -->
-        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-        <!--폰트어섬추가 -->
-        <!--bootstrap js 추가 -->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <!--폰트어섬추가 -->
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!--폰트어섬추가 -->
+    <!--bootstrap js 추가 -->
     <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/common.js"></script>
 </head>
 <body>
     <div class="container" style="padding-top: 10px;">
@@ -36,6 +34,8 @@
                             <a href="/">Home</a>
                         </li>
                         <li><a href="/admin/products">ADMIN</a></li>
+                        <li><a href="/chat">CHAT</a></li>
+                        <li><a href="/cart">CART</a></li>
                         <% if(isLogin){%>
                             <li><a href="/accounts/logout" onclick="return confirm('로그아웃 하시겠습니까?')">LOGOUT</a></li>
                         <%}else{%>
@@ -46,4 +46,3 @@
                 </div> 
             </div> 
         </nav>
-    <div class="container" style="padding-top:100px;">
