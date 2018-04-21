@@ -2,7 +2,8 @@ var express = require('express');
 var router = express.Router();
 var ProductsModel = require('../models/ProductsModel');
 var CommentsModel = require('../models/CommentsModel');
-var loginRequired = require('../libs/loginRequired');
+var CheckoutModel = require('../models/CheckoutModel');
+var adminRequired = require('../libs/adminRequired');
 var co = require('co');
 var paginate = require('express-paginate');
 
@@ -32,30 +33,30 @@ router.get('/', function (req, res) {
     res.send('admin app');
 });
 
-router.get('/products', paginate.middleware(3, 50), async (req,res) => {
+router.get('/products', paginate.middleware(3, 50), async (req, res) => {
 
-    const [ results, itemCount ] = await Promise.all([
+    const [results, itemCount] = await Promise.all([
         ProductsModel.find().limit(req.query.limit).skip(req.skip).exec(),
         ProductsModel.count({})
     ]);
     const pageCount = Math.ceil(itemCount / req.query.limit);
-    
-    const pages = paginate.getArrayPages(req)( 4 , pageCount, req.query.page);
 
-    res.render('admin/products', { 
-        products : results , 
+    const pages = paginate.getArrayPages(req)(4, pageCount, req.query.page);
+
+    res.render('admin/products', {
+        products: results,
         pages: pages,
-        pageCount : pageCount,
+        pageCount: pageCount,
     });
 
 });
 
-router.get('/products/write', loginRequired, csrfProtection, function (req, res) {
+router.get('/products/write', adminRequired, csrfProtection, function (req, res) {
     //edit에서도 같은 form을 사용하므로 빈 변수( product )를 넣어서 에러를 피해준다
     res.render('admin/form', { product: "", csrfToken: req.csrfToken() });
 });
 
-router.post('/products/write', loginRequired, upload.single('thumbnail'), csrfProtection, function (req, res) {
+router.post('/products/write', adminRequired, upload.single('thumbnail'), csrfProtection, function (req, res) {
 
     console.log(req.file); // 파일이 잘 들어오는 지 체크
     var product = new ProductsModel({
@@ -85,20 +86,20 @@ router.get('/products/detail/:id', function (req, res) {
         };
     };
 
-        getData().then(function (result) {
-            res.render('admin/productsDetail', { product: result.product, comments: result.comments });
-        });
+    getData().then(function (result) {
+        res.render('admin/productsDetail', { product: result.product, comments: result.comments });
     });
+});
 
 
-router.get('/products/edit/:id', loginRequired, csrfProtection, function (req, res) {
+router.get('/products/edit/:id', adminRequired, csrfProtection, function (req, res) {
     //기존에 폼에 value안에 값을 셋팅하기 위해 만든다.
     ProductsModel.findOne({ id: req.params.id }, function (err, product) {
         res.render('admin/form', { product: product, csrfToken: req.csrfToken() });
     });
 });
 
-router.post('/products/edit/:id', loginRequired, upload.single('thumbnail'), csrfProtection, function (req, res) {
+router.post('/products/edit/:id', adminRequired, upload.single('thumbnail'), csrfProtection, function (req, res) {
     //그전에 지정되 있는 파일명을 받아온다
     ProductsModel.findOne({ id: req.params.id }, function (err, product) {
 
@@ -151,8 +152,65 @@ router.post('/products/ajax_comment/delete', function (req, res) {
     });
 });
 
-router.post('/products/ajax_summernote', loginRequired, upload.single('thumbnail'), function(req,res){
-    res.send( '/uploads/' + req.file.filename);
+router.post('/products/ajax_summernote', adminRequired, upload.single('thumbnail'), function (req, res) {
+    res.send('/uploads/' + req.file.filename);
+});
+
+router.get('/order', adminRequired, function (req, res) {
+    CheckoutModel.find(function (err, orderList) { //첫번째 인자는 err, 두번째는 받을 변수명
+        res.render('admin/orderList',
+            { orderList: orderList }
+        );
+    });
+});
+
+router.get('/order/edit/:id', adminRequired, function (req, res) {
+    CheckoutModel.findOne({ id: req.params.id }, function (err, order) {
+        res.render('admin/orderForm',
+            { order: order }
+        );
+    });
+});
+
+router.post('/order/edit/:id', adminRequired, function (req, res) {
+    var query = {
+        status: req.body.status,
+        song_jang: req.body.song_jang
+    };
+
+    CheckoutModel.update({ id: req.params.id }, { $set: query }, function (err) {
+        res.redirect('/admin/order');
+    });
+});
+
+router.get('/statistics', adminRequired, function (req, res) {
+    CheckoutModel.find(function (err, orderList) {
+
+        var barData = [];   // 넘겨줄 막대그래프 데이터 초기값 선언
+        var pieData = [];   // 원차트에 넣어줄 데이터 삽입
+        orderList.forEach(function (order) {
+            // 08-10 형식으로 날짜를 받아온다
+            var date = new Date(order.created_at);
+            var monthDay = (date.getMonth() + 1) + '-' + date.getDate();
+
+            // 날짜에 해당하는 키값으로 조회
+            if (monthDay in barData) {
+                barData[monthDay]++; //있으면 더한다
+            } else {
+                barData[monthDay] = 1; //없으면 초기값 1넣어준다.
+            }
+
+            // 결재 상태를 검색해서 조회
+            if (order.status in pieData) {
+                pieData[order.status]++; //있으면 더한다
+            } else {
+                pieData[order.status] = 1; //없으면 결재상태+1
+            }
+
+        });
+
+        res.render('admin/statistics', { barData: barData, pieData: pieData });
+    });
 });
 
 module.exports = router
